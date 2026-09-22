@@ -7,7 +7,7 @@ allow {
   input.application.status == "ACTIVE"
   input.token.claims.organization_id == input.application.organization_id
   input.token.claims.application_id == input.application.application_id
-  has_role("APPLICATION_USER")
+  has_application_access_role
 }
 
 decision := {"allow": allow, "reasons": reasons} {
@@ -31,9 +31,17 @@ deny["token application does not match requested application"] {
 
 deny["APPLICATION_USER role is required"] {
   input.action == "application.login"
-  not has_role("APPLICATION_USER")
+  not has_application_access_role
 }
 
 has_role(role) {
   input.token.claims.realm_access.roles[_] == role
+}
+
+has_application_access_role {
+  has_role("APPLICATION_USER")
+}
+
+has_application_access_role {
+  has_role("APPLICATION_SUPER_ADMIN")
 }
